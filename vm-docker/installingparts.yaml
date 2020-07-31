@@ -1,0 +1,58 @@
+---
+- name: Installing all the necessary parts for all vm
+  hosts: all-vm
+  become: yes
+  vars:
+    ansible_user: ansible
+  tasks:
+  - name: Install vim
+    yum:
+      name: vim-enhanced
+      state: latest
+  - name: Install nano
+    yum:
+      name: nano
+      state: latest
+  - name: Install net tools
+    yum:
+      name: net-tools
+      state: latest
+
+- name: Installing all the necessary parts for vm-docker
+  hosts: docker-nodes
+  become: yes
+  vars:
+    ansible_user: ansible
+  tasks:
+  - name: Install EPEL repository
+    yum:
+      name: epel-release
+      state: latest
+  - name: Install Python pip
+    yum:
+      name: python-pip
+  - name: Upgrade pip
+    pip:
+      name: pip
+      extra_args: --upgrade
+  - name: Install Docker module for Python
+    pip:
+      name: docker
+      state: latest
+  - name: Install Docker Compose module
+    pip:
+      name: docker-compose
+      state: latest
+  - name: Install jsondiff
+    pip:
+      name: jsondiff
+      state: latest
+  - name: Install Git
+    yum:
+      name: git
+      state: latest
+  - name: Clone the app repo
+    git:
+      repo: 'https://github.com/yohannafrans/secondphasefinalproject'
+      dest: /home/ansible/secondphasefinalproject
+      version: master

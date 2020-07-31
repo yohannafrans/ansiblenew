@@ -1,0 +1,45 @@
+---
+- name: Install nginx
+  hosts: webservers
+  become: yes
+  vars:
+    ansible_user: ansible
+  tasks:
+  - name: Install EPEL repository to add nginx repository
+    yum:
+      name: epel-release
+      state: latest
+  - name: Install nginx to the latest version
+    yum:
+      name: nginx
+      state: latest
+  - name: Delete the nginx.conf default file
+    file:
+      path: /etc/nginx/nginx.conf
+      state: absent
+  # - name: Print working directory
+  #   shell: pwd
+  # - debug:
+  #     msg: "{{ lookup('env', 'PWD') }}"
+  - name: Copy the new nginx.conf file
+    copy:
+      src: nginx.conf
+      dest: /etc/nginx/nginx.conf
+  - name: Copy  the load balancer config file and restart nginx
+    copy:
+      src: load-balancer.conf
+      dest: /etc/nginx/conf.d/load-balancer.conf
+  - name: Start and enable nginx
+    service:
+      name: nginx
+      state: started
+      enabled: yes
+  - name: Open firewall for http access
+    firewalld:
+      service: http
+      permanent: true
+      state: enabled
+  - name: Restart the firewalld service to load in the firewall changes
+    service:
+      name: firewalld
+      state: restarted

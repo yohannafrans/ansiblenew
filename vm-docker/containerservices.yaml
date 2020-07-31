@@ -1,0 +1,57 @@
+---
+- name: Deploy Ghost and Traefik using Docker Swarm
+  hosts: docker-nodes
+  become: yes
+  vars:
+    ansible_user: ansible
+  tasks:
+  - name: Create a Traefik network overlay
+    docker_network:
+      name: traefik-public
+      driver: overlay
+  - name: Create a Ghost network overlay
+    docker_network:
+      name: ghost-network
+      driver: overlay
+  - name: Deploy Traefik from a compose file
+    docker_stack:
+      state: present
+      name: traefik
+      compose:
+        - /home/ansible/secondphasefinalproject/ghost/traefik/docker-compose.yml
+  - name: Deploy Ghost from a compose file
+    docker_stack:
+      state: present
+      name: ghost
+      compose:
+        - /home/ansible/secondphasefinalproject/ghost/docker-compose.yml
+  # - name: Scale Ghost service into three
+  #   shell: docker service scale ghost_ghost=3
+
+- name: Deploy Alertmanager, Grafana, and Promethues using Docker Swarm
+  hosts: docker-nodes
+  become: yes
+  vars:
+    ansible_user: ansible
+  tasks:
+  - name: Deploy Alertmanager, Grafana, and Prometheus from a compose file
+    docker_stack:
+      state: present
+      name: monitoring
+      compose:
+        - /home/ansible/secondphasefinalproject/monitoring/docker-compose.yml
+
+- name: Deploy ELK using Docker Swarm
+  hosts: docker-nodes
+  become: yes
+  vars:
+    ansible_user: ansible
+  tasks:
+  - name: Deploy ELK from a compose file
+    docker_stack:
+      state: present
+      name: logging
+      compose:
+        - /home/ansible/secondphasefinalproject/logging/docker-compose.yml
+  # - name: Increase vm.max_map_count on elasticsearch nodes
+  #   shell: sysctl -w vm.max_map_count=262144

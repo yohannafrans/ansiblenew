@@ -1,0 +1,35 @@
+---
+- name: Install Docker
+  hosts: docker-nodes
+  become: yes
+  vars:
+    ansible_user: ansible
+  tasks:
+  - name: Install yum utils
+    yum:
+      name: yum-utils
+      state: latest
+  - name: Install device-mapper-persistent-data
+    yum:
+      name: device-mapper-persistent-data
+      state: latest
+  - name: Install lvm2
+    yum:
+      name: lvm2
+      state: latest
+  - name: Add Docker repo
+    get_url:
+      url: https://download.docker.com/linux/centos/docker-ce.repo
+      dest: /etc/yum.repos.d/docker-ce.repo
+  - name: Install Docker itself
+    package:
+      name: docker-ce
+      state: latest
+  - name: Start Docker service
+    service:
+      name: docker
+      state: started
+      enabled: yes
+  - name: Init a new swarm with defaults parameters
+    docker_swarm:
+      state: present
